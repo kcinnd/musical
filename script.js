@@ -137,42 +137,48 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         notesData.forEach(note => {
-            if (note.revealed || note.revealProgress > 0) {
-                const opacity = note.revealProgress / 100;
-                ctx.globalAlpha = opacity;
-                ctx.drawImage(note.img, note.x, note.y, note.width, note.height);
-                ctx.globalAlpha = 1.0;
+            if (note.revealed) {
+                const scale = Math.min(100 / note.img.width, 100 / note.img.height);
+                const scaledWidth = note.img.width * scale;
+                const scaledHeight = note.img.height * scale;
+                ctx.drawImage(note.img, note.x, note.y, scaledWidth, scaledHeight);
             }
         });
     }
 
-    function drawBeam(x, y, color) {
+    function drawBeam(x, y) {
+        const colorIndex = Math.floor(Math.random() * beamColors.length);
+        const color = beamColors[colorIndex];
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, beamRadius);
         gradient.addColorStop(0, color[0]);
         gradient.addColorStop(1, color[1]);
+
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(x, y, beamRadius, 0, Math.PI * 2);
+        ctx.arc(x, y, beamRadius, 0, 2 * Math.PI);
         ctx.fill();
     }
 
-    canvas.addEventListener('mousemove', function(event) {
+   canvas.addEventListener('mousemove', function(event) {
         const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const selectedColor = beamColors[Math.floor(Math.random() * beamColors.length)];
-        currentBeam = { x, y, color: selectedColor };
-        redrawCanvas(); // Move the beam with the mouse
+        mouseX = event.clientX - rect.left;
+        mouseY = event.clientY - rect.top;
+        redrawCanvas(); // Update the canvas with the new beam position
     });
 
-    canvas.addEventListener('click', function() {
-        if (currentBeam) {
-            litAreas.push(currentBeam); // Stick the current beam in place
-            currentBeam = null; // Remove the current beam
-            redrawCanvas(); // Update the drawing
-        }
+    canvas.addEventListener('click', function(event) {
+        const x = event.clientX - canvas.getBoundingClientRect().left;
+        const y = event.clientY - canvas.getBoundingClientRect().top;
+        
+        notesData.forEach(note => {
+            if (!note.revealed && x >= note.x && x <= note.x + note.width && y >= note.y && y <= note.y + note.height) {
+                note.revealed = true;
+            }
+        });
+
+        redrawCanvas(); // Redraw to show any revealed notes
     });
 
     window.addEventListener('resize', resizeCanvas);
-    preloadNotes(); // Start loading the notes
+    preloadNotes(); // Load the notes
 });
