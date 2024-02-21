@@ -120,72 +120,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function redrawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    litAreas.forEach(area => {
-        const gradient = ctx.createRadialGradient(area.x, area.y, 0, area.x, area.y, beamRadius);
-        gradient.addColorStop(0, area.color[0]);
-        gradient.addColorStop(1, area.color[1]);
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(area.x, area.y, beamRadius, 0, Math.PI * 2);
-        ctx.fill();
-    });
+        // Draw all "stuck" beams
+        litAreas.forEach(area => drawBeam(area.x, area.y, area.color));
 
-    notesData.forEach(note => {
-        if (note.revealed || note.revealProgress > 0) {
-            const maxWidth = 100; // Max width for the images
-            let scaleFactor = maxWidth / note.img.width;
-            let scaledWidth = maxWidth;
-            let scaledHeight = note.img.height * scaleFactor;
-
-            const opacity = note.revealProgress / 100;
-            ctx.globalAlpha = opacity;
-            ctx.drawImage(note.img, note.x, note.y, scaledWidth, scaledHeight);
-            ctx.globalAlpha = 1.0;
+        // Draw the current beam that follows the mouse, if any
+        if (currentBeam) {
+            drawBeam(currentBeam.x, currentBeam.y, currentBeam.color);
         }
-    });
-}
-
-    function createGlow(x, y) {
-        const selectedColor = beamColors[Math.floor(Math.random() * beamColors.length)];
-        litAreas.push({ x, y, color: selectedColor });
 
         notesData.forEach(note => {
-            const distance = Math.hypot(x - (note.x + note.width / 2), y - (note.y + note.height / 2));
-            if (distance <= beamRadius) {
-                note.revealProgress = Math.min(note.revealProgress + 20, 100);
-                if (note.revealProgress >= 100) {
-                    note.revealed = true;
-                }
+            if (note.revealed || note.revealProgress > 0) {
+                const opacity = note.revealProgress / 100;
+                ctx.globalAlpha = opacity;
+                ctx.drawImage(note.img, note.x, note.y, note.width, note.height);
+                ctx.globalAlpha = 1.0;
             }
         });
+    }
 
-        redrawCanvas();
+    function drawBeam(x, y, color) {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, beamRadius);
+        gradient.addColorStop(0, color[0]);
+        gradient.addColorStop(1, color[1]);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, beamRadius, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     canvas.addEventListener('mousemove', function(event) {
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-        createGlow(x, y);
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const selectedColor = beamColors[Math.floor(Math.random() * beamColors.length)];
+        currentBeam = { x, y, color: selectedColor };
+        redrawCanvas(); // Move the beam with the mouse
+    });
 
-        notesData.forEach(note => {
-            if (note.revealed) {
-                const noteRect = { left: note.x, right: note.x + note.width, top: note.y, bottom: note.y + note.height };
-                if (x >= noteRect.left && x <= noteRect.right && y >= noteRect.top && y <= noteRect.bottom) {
-                    if (note.audio.paused) {
-                        note.audio.play();
-                    } else {
-                        note.audio.pause();
-                    }
-                }
-            }
-        });
+    canvas.addEventListener('click', function() {
+        if (currentBeam) {
+            litAreas.push(currentBeam); // Stick the current beam in place
+            currentBeam = null; // Remove the current beam
+            redrawCanvas(); // Update the drawing
+        }
     });
 
     window.addEventListener('resize', resizeCanvas);
-    preloadNotes(); // Make sure to call this function to start loading the notes
+    preloadNotes(); // Start loading the notes
 });
