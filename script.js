@@ -147,16 +147,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function drawBeam(x, y) {
-        const colorIndex = Math.floor(Math.random() * beamColors.length);
-        const color = beamColors[colorIndex];
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, beamRadius);
-        gradient.addColorStop(0, color[0]);
-        gradient.addColorStop(1, color[1]);
+    const colorIndex = Math.floor(Math.random() * beamColors.length);
+    const color = beamColors[colorIndex];
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, beamRadius);
+    gradient.addColorStop(0, color[0]);
+    gradient.addColorStop(1, color[1]);
 
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(x, y, beamRadius, 0, 2 * Math.PI);
-        ctx.fill();
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, beamRadius, 0, 2 * Math.PI);
+    ctx.fill();
     }
 
    canvas.addEventListener('mousemove', function(event) {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     mouseX = (event.clientX - rect.left) * (canvas.width / rect.width);
     mouseY = (event.clientY - rect.top) * (canvas.height / rect.height);
     redrawCanvas();
-});
+    });
 
     canvas.addEventListener('click', function(event) {
         const x = event.clientX - canvas.getBoundingClientRect().left;
