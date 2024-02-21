@@ -160,11 +160,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    canvas.addEventListener('mousemove', function(event) {
-        const rect = canvas.getBoundingClientRect();
-        mouseX = event.clientX - rect.left;
-        mouseY = event.clientY - rect.top;
-        redrawCanvas(); // Update the canvas with the new beam position
-    });
+    const rect = canvas.getBoundingClientRect();
+    // Scale mouse coordinates to canvas dimensions
+    mouseX = (event.clientX - rect.left) * (canvas.width / rect.width);
+    mouseY = (event.clientY - rect.top) * (canvas.height / rect.height);
+    redrawCanvas();
+});
 
     canvas.addEventListener('click', function(event) {
         const x = event.clientX - canvas.getBoundingClientRect().left;
