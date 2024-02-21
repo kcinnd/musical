@@ -126,6 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        drawbeam(mouseX, mouseY);
+
         // Draw all "stuck" beams
         litAreas.forEach(area => drawBeam(area.x, area.y, area.color));
 
