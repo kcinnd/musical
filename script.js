@@ -165,10 +165,10 @@ document.addEventListener('DOMContentLoaded', function() {
         redrawCanvas();
     }
 
-    canvas.addEventListener('click', function(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+    canvas.addEventListener('mousemove', function(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
         createGlow(x, y);
 
         notesData.forEach(note => {
