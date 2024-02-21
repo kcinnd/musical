@@ -146,40 +146,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function drawBeam(x, y) {
-    const colorIndex = Math.floor(Math.random() * beamColors.length);
-    const color = beamColors[colorIndex];
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, beamRadius);
-    gradient.addColorStop(0, color[0]);
-    gradient.addColorStop(1, color[1]);
-
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(x, y, beamRadius, 0, 2 * Math.PI);
-    ctx.fill();
+    function drawBeam(x, y, color) {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, beamRadius);
+        gradient.addColorStop(0, color[0]);
+        gradient.addColorStop(1, color[1]);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, beamRadius, 0, 2 * Math.PI);
+        ctx.fill();
     }
 
-   canvas.addEventListener('mousemove', function(event) {
-    const rect = canvas.getBoundingClientRect();
-    // Scale mouse coordinates to canvas dimensions
-    mouseX = (event.clientX - rect.left) * (canvas.width / rect.width);
-    mouseY = (event.clientY - rect.top) * (canvas.height / rect.height);
-    redrawCanvas();
+    function getMousePos(canvas, event) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (event.clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('mousemove', function(event) {
+        const pos = getMousePos(canvas, event);
+        // Update the position of the current beam to follow the mouse
+        // Choose a random color for each movement or keep the color consistent
+        const selectedColor = beamColors[Math.floor(Math.random() * beamColors.length)];
+        drawBeam(pos.x, pos.y, selectedColor); // Draw beam at mouse position
+        redrawCanvas(); // Redraw canvas to reflect the new beam position
     });
 
     canvas.addEventListener('click', function(event) {
-        const x = event.clientX - canvas.getBoundingClientRect().left;
-        const y = event.clientY - canvas.getBoundingClientRect().top;
-        
-        notesData.forEach(note => {
-            if (!note.revealed && x >= note.x && x <= note.x + note.width && y >= note.y && y <= note.y + note.height) {
-                note.revealed = true;
-            }
-        });
-
-        redrawCanvas(); // Redraw to show any revealed notes
+        const pos = getMousePos(canvas, event);
+        const selectedColor = beamColors[Math.floor(Math.random() * beamColors.length)];
+        litAreas.push({ x: pos.x, y: pos.y, color: selectedColor }); // "Stick" the beam in place on click
+        redrawCanvas(); // Redraw canvas to show the "stuck" beam
     });
 
     window.addEventListener('resize', resizeCanvas);
-    preloadNotes(); // Load the notes
+    preloadNotes(); // Start loading the notes
 });
