@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const litAreas = []; // Array to track lit areas
     const beamRadius = 50; //
     let currentBeam = null;
+    let mousex = 0;
+    let mousey = 0;
 
     const beamColors = [
     ['rgba(255, 7, 58, 1)', 'rgba(255, 7, 58, 0)'],
