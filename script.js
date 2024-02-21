@@ -119,29 +119,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function redrawCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        litAreas.forEach(area => {
-            const gradient = ctx.createRadialGradient(area.x, area.y, 0, area.x, area.y, beamRadius);
-            gradient.addColorStop(0, area.color[0]);
-            gradient.addColorStop(1, area.color[1]);
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(area.x, area.y, beamRadius, 0, Math.PI * 2);
-            ctx.fill();
-        });
+    litAreas.forEach(area => {
+        const gradient = ctx.createRadialGradient(area.x, area.y, 0, area.x, area.y, beamRadius);
+        gradient.addColorStop(0, area.color[0]);
+        gradient.addColorStop(1, area.color[1]);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(area.x, area.y, beamRadius, 0, Math.PI * 2);
+        ctx.fill();
+    });
 
-        notesData.forEach(note => {
-            if (note.revealed || note.revealProgress > 0) {
-                const opacity = note.revealProgress / 100;
-                ctx.globalAlpha = opacity;
-                ctx.drawImage(note.img, note.x, note.y, note.width, note.height);
-                ctx.globalAlpha = 1.0;
-            }
-        });
-    }
+    notesData.forEach(note => {
+        if (note.revealed || note.revealProgress > 0) {
+            const maxWidth = 100; // Max width for the images
+            let scaleFactor = maxWidth / note.img.width;
+            let scaledWidth = maxWidth;
+            let scaledHeight = note.img.height * scaleFactor;
+
+            const opacity = note.revealProgress / 100;
+            ctx.globalAlpha = opacity;
+            ctx.drawImage(note.img, note.x, note.y, scaledWidth, scaledHeight);
+            ctx.globalAlpha = 1.0;
+        }
+    });
+}
 
     function createGlow(x, y) {
         const selectedColor = beamColors[Math.floor(Math.random() * beamColors.length)];
